@@ -160,7 +160,7 @@ class RealESRGANer():
                         output_tile = self.model(input_tile)
                 except RuntimeError as error:
                     print('Error', error)
-                print(f'\tTile {tile_idx}/{tiles_x * tiles_y}')
+                #print(f'\tTile {tile_idx}/{tiles_x * tiles_y}')
 
                 # output tile area on total image
                 output_start_x = input_start_x * self.scale
