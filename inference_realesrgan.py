@@ -3,6 +3,8 @@ import cv2
 import glob
 import os
 from basicsr.archs.rrdbnet_arch import RRDBNet
+from basicsr.archs.rrdbnet_lp_arch import RRDBNet_lp
+
 from basicsr.utils.download_util import load_file_from_url
 
 from realesrgan import RealESRGANer
@@ -36,6 +38,9 @@ def main():
     parser.add_argument('-t', '--tile', type=int, default=0, help='Tile size, 0 for no tile during testing')
     parser.add_argument('--tile_pad', type=int, default=10, help='Tile padding')
     parser.add_argument('--pre_pad', type=int, default=0, help='Pre padding size at each border')
+    parser.add_argument('--generator_patch_size', type=int, default=0, help='Input patch size, 0 for no patch-based inference')
+    parser.add_argument('--num_patches_height', type=int, default=3, help='Number of patches along the height dimension')
+    parser.add_argument('--num_patches_width', type=int, default=3, help='Number of patches along the width dimension')
     parser.add_argument('--face_enhance', action='store_true', help='Use GFPGAN to enhance face')
     parser.add_argument(
         '--fp32', action='store_true', help='Use fp32 precision during inference. Default: fp16 (half precision).')
@@ -60,6 +65,10 @@ def main():
         model = RRDBNet(num_in_ch=3, num_out_ch=3, num_feat=64, num_block=23, num_grow_ch=32, scale=4)
         netscale = 4
         file_url = ['https://github.com/xinntao/Real-ESRGAN/releases/download/v0.1.0/RealESRGAN_x4plus.pth']
+    if args.model_name == 'RealESRGAN_x4plus_lp':  # x4 RRDBNet model
+        model = RRDBNet_lp(num_in_ch=3, num_out_ch=3, num_feat=64, num_block=23, num_grow_ch=32, scale=4
+                           ,padding_mode='local',outer_padding='constant',num_patches_h=3,num_patches_w=3)
+        netscale = 4
     elif args.model_name == 'RealESRNet_x4plus':  # x4 RRDBNet model
         model = RRDBNet(num_in_ch=3, num_out_ch=3, num_feat=64, num_block=23, num_grow_ch=32, scale=4)
         netscale = 4
@@ -112,6 +121,9 @@ def main():
         tile=args.tile,
         tile_pad=args.tile_pad,
         pre_pad=args.pre_pad,
+        num_patches_height=args.num_patches_height,
+        num_patches_width=args.num_patches_width,
+        generator_patch_size=args.generator_patch_size,
         half=not args.fp32,
         gpu_id=args.gpu_id)
 

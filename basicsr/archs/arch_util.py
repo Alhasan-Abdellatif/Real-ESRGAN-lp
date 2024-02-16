@@ -401,7 +401,7 @@ def tile_process(img,model,scale= 4,tile_size = 32,tile_pad = 8):
 
 
 
-def super_resolve_from_gen_PatchByPatch_test(netG,input,num_patches_height=3, num_patches_width=3,generator_patch_resolution=8,SR_scale = 4, device ='cpu'): 
+def super_resolve_from_gen_PatchByPatch_test(netG,input,num_patches_height=3, num_patches_width=3,generator_patch_size=8,SR_scale = 4, device ='cpu'): 
     
     """
     Generate a large image using a Patch-by-Patch sampling approach from a PyTorch generator network.
@@ -424,25 +424,25 @@ def super_resolve_from_gen_PatchByPatch_test(netG,input,num_patches_height=3, nu
     
     _,_,input_resolution_height,input_resolution_width = input.shape
    
-    generator_output_patch_resolution = generator_patch_resolution*SR_scale
+    generator_output_patch_resolution = generator_patch_size*SR_scale
     output_resolution_height = input_resolution_height*SR_scale
     output_resolution_width = input_resolution_width*SR_scale
     
-    sub_image_height = generator_patch_resolution*num_patches_height
-    sub_image_width = generator_patch_resolution*num_patches_width
+    sub_image_height = generator_patch_size*num_patches_height
+    sub_image_width = generator_patch_size*num_patches_width
     
     # Calculate the number of steps in both dimensions required to iterate through the generator to generate the full image
-    steps_h = math.ceil((input_resolution_height/generator_patch_resolution - 1)/(num_patches_height-1))
-    steps_w = math.ceil((input_resolution_width/generator_patch_resolution - 1)/(num_patches_width-1))
+    steps_h = math.ceil((input_resolution_height/generator_patch_size - 1)/(num_patches_height-1))
+    steps_w = math.ceil((input_resolution_width/generator_patch_size - 1)/(num_patches_width-1))
     
     # Extend the input size by replicate padding to make sure it matches the target input defined by the calulated steps
     # In the end, we will drop those extended pixels
-    extension_height = generator_patch_resolution*(steps_h*(num_patches_height-1)+1) - input_resolution_height
-    extension_width = generator_patch_resolution*(steps_w*(num_patches_width-1)+1) - input_resolution_width 
-    extended_input = F.pad(input, (0, extension_width, 0, extension_height), mode='replicate')
+    extension_height = generator_patch_size*(steps_h*(num_patches_height-1)+1) - input_resolution_height
+    extension_width = generator_patch_size*(steps_w*(num_patches_width-1)+1) - input_resolution_width 
+    extended_input = F.pad(input, (0, extension_width, 0, extension_height), mode='reflect')
 
     # Build the inputs to the generator z and maps
-    input_sub_images = crop_images(extended_input,sub_image_height,sub_image_width,generator_patch_resolution*(num_patches_width-1),'cpu')
+    input_sub_images = crop_images(extended_input,sub_image_height,sub_image_width,generator_patch_size*(num_patches_width-1),'cpu')
     
     # Iterate through the generator with to generate the sub_images in sequence 
     # and concatente the sub_images to form the full image

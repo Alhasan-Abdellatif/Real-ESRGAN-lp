@@ -5,8 +5,11 @@ import os
 import queue
 import threading
 import torch
+from collections import OrderedDict
+
 from basicsr.utils.download_util import load_file_from_url
 from torch.nn import functional as F
+from basicsr.archs.arch_util import super_resolve_from_gen_PatchByPatch_test
 
 ROOT_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
@@ -34,6 +37,9 @@ class RealESRGANer():
                  tile=0,
                  tile_pad=10,
                  pre_pad=10,
+                 num_patches_height=3,
+                 num_patches_width=3,
+                 generator_patch_size=8,
                  half=False,
                  device=None,
                  gpu_id=None):
@@ -41,6 +47,9 @@ class RealESRGANer():
         self.tile_size = tile
         self.tile_pad = tile_pad
         self.pre_pad = pre_pad
+        self.num_patches_height = num_patches_height
+        self.num_patches_width = num_patches_width
+        self.generator_patch_size = generator_patch_size
         self.mod_scale = None
         self.half = half
 
@@ -67,12 +76,30 @@ class RealESRGANer():
             keyname = 'params_ema'
         else:
             keyname = 'params'
-        model.load_state_dict(loadnet[keyname], strict=True)
+            
+        if generator_patch_size > 0:
+            state_dict = self.update_keys(loadnet[keyname])
+        else:
+            state_dict = loadnet[keyname]
+        
+        
+        model.load_state_dict(state_dict, strict=True)
 
         model.eval()
         self.model = model.to(self.device)
         if self.half:
             self.model = self.model.half()
+     
+     
+    def update_keys(self,state_dict):
+        new_state_dict= OrderedDict()
+        for k, v in state_dict.items():
+            if 'weight' in k:
+                k = k.replace('weight','conv.weight')
+            if 'bias' in k:
+                k = k.replace('bias','conv.bias')
+            new_state_dict[k] = v
+        return new_state_dict       
 
     def dni(self, net_a, net_b, dni_weight, key='params', loc='cpu'):
         """Deep network interpolation.
@@ -113,6 +140,12 @@ class RealESRGANer():
     def process(self):
         # model inference
         self.output = self.model(self.img)
+        
+    def patch_process_with_localpadding(self):
+        # model inference patch by patch with local padding
+        self.output = super_resolve_from_gen_PatchByPatch_test(self.model,self.img,num_patches_height=self.num_patches_height
+                                                               ,num_patches_width=self.num_patches_width,SR_scale=self.scale
+                                                               ,generator_patch_size=self.generator_patch_size,device=self.device)
 
     def tile_process(self):
         """It will first crop input images to tiles, and then process each tile.
@@ -217,7 +250,9 @@ class RealESRGANer():
 
         # ------------------- process image (without the alpha channel) ------------------- #
         self.pre_process(img)
-        if self.tile_size > 0:
+        if self.generator_patch_size > 0:
+            self.patch_process_with_localpadding()
+        elif self.tile_size > 0:
             self.tile_process()
         else:
             self.process()
