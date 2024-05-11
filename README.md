@@ -1,12 +1,15 @@
-# Enhanced RealESRGAN
+# RealESRGAN-LP
 
 ## Introduction
-Enhanced RealESRGAN is an improved version of the RealESRGAN model designed to eliminate tiling artifacts when super-resolving large inputs. Tiling artifacts are common in super-resolution tasks when processing large images due to the necessity of dividing the image into smaller patches for processing. The following is quoted from Real-ESRGAN official reop:
+RealESRGAN-LP is an improved version of the RealESRGAN model designed to eliminate tiling artifacts when super-resolving large inputs. Tiling artifacts are common in super-resolution tasks when processing large images due to the necessity of dividing the image into smaller patches for processing. 
+
+The following is quoted from Real-ESRGAN official reop:
+
 "Note that it may introduce block inconsistency (and also generate slightly different results from the PyTorch implementation), because this executable file first crops the input image into several tiles, and then processes them separately, finally stitches together."
 This modification aims to enhance the performance of RealESRGAN by addressing these artifacts.
 
 ## Modification Details
-- **Patch-Based Inference with Local Padding**: Enhanced RealESRGAN utilizes patch-based inference with local padding instead of zero-padding. This approach involves padding inputs and activations with content from neighboring patches, allowing the model to maintain consistency and continuity across patch boundaries, thereby reducing artifacts caused by patch-based processing.
+- **Patch-Based Inference with Local Padding**: RealESRGAN-LP utilizes patch-based inference with local padding instead of zero-padding. This approach involves padding inputs and activations with content from neighboring patches, allowing the model to maintain consistency and continuity across patch boundaries, thereby reducing artifacts caused by patch-based processing.
 
 ## Inference with local padding
 Local padding is directly applied to the pre-trained model by dropping all the zero paddings and instead use local padding in patch-based inference mode. The following code can be used to to perform inference with local padding:
@@ -21,8 +24,7 @@ The current implementation does not work on 4-channel 16-bit images. They could 
 ## Comparision between differet tiling results and our local padding techniques
 
 
-![alt text](sr.png)
-
+#![alt text](sr.png)
 
 
 
