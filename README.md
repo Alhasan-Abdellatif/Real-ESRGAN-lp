@@ -1,9 +1,9 @@
 # RealESRGAN-LP
 
 ## Introduction
-RealESRGAN-LP is an improved version of the RealESRGAN model designed to eliminate tiling artifacts when super-resolving large inputs. Tiling artifacts are common in super-resolution tasks when processing large images due to the necessity of dividing the image into smaller patches for processing. 
+RealESRGAN-LP, https://arxiv.org/abs/2309.02340, is an improved version of the RealESRGAN model designed to eliminate tiling artifacts when super-resolving large inputs. Tiling artifacts are common in super-resolution tasks when processing large images due to the necessity of dividing the image into smaller patches for processing. 
 
-The following is quoted from Real-ESRGAN official reop:
+The following is quoted from Real-ESRGAN official repo:
 
 "Note that it may introduce block inconsistency (and also generate slightly different results from the PyTorch implementation), because this executable file first crops the input image into several tiles, and then processes them separately, finally stitches together."
 This modification aims to enhance the performance of RealESRGAN by addressing these artifacts.
@@ -24,9 +24,12 @@ The current implementation does not work on 4-channel 16-bit images. They could 
 ## Comparision between differet tiling results and our local padding techniques
 
 
-#![alt text](sr.png)
-
+![alt text](sr_256.png)
 
 
 ## Requirements
 The requiremnets are the same as in the original RealESRGAN repo
+
+
+## Citations
+Please cite the following paper: https://arxiv.org/abs/2309.02340 if you want to used RealESRGAN-lp in your work. 
