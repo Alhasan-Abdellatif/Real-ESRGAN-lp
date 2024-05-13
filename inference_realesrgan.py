@@ -67,7 +67,8 @@ def main():
         file_url = ['https://github.com/xinntao/Real-ESRGAN/releases/download/v0.1.0/RealESRGAN_x4plus.pth']
     if args.model_name == 'RealESRGAN_x4plus_lp':  # x4 RRDBNet model
         model = RRDBNet_lp(num_in_ch=3, num_out_ch=3, num_feat=64, num_block=23, num_grow_ch=32, scale=4
-                           ,padding_mode='local',outer_padding='constant',num_patches_h=3,num_patches_w=3)
+                           ,padding_mode='local',outer_padding='constant'
+                           ,num_patches_h=args.num_patches_height,num_patches_w=args.num_patches_width)
         netscale = 4
     elif args.model_name == 'RealESRNet_x4plus':  # x4 RRDBNet model
         model = RRDBNet(num_in_ch=3, num_out_ch=3, num_feat=64, num_block=23, num_grow_ch=32, scale=4)
